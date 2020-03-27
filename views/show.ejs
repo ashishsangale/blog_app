@@ -12,6 +12,10 @@
                 <p><%- blog.body %> </p>
             </div>
         </div>
+        <a class="ui inverted secondary button" href="/blogs/<%= blog._id %>/edit ">E D I T</a>
+        <form id="delete" method="POST" action="/blogs/<%= blog._id %>?_method=DELETE ">
+            <button class="ui inverted red button">D E L E T E</button>
+        </form>
         
         
         
