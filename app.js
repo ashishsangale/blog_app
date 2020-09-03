@@ -1,29 +1,20 @@
+
 var express = require('express'),
     app = express(),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override')
     expressSanitizer = require('express-sanitizer');
+    db = require('./model/schema');
 
-mongoose.connect("mongodb://localhost/blogapp");
+mongoose.connect("mongodb://localhost/blogapp", {
+    useNewUrlParser: true, useUnifiedTopology: true
+});
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(expressSanitizer());
 app.use(methodOverride("_method"));
-
-//Schema
-var blogSchema = new mongoose.Schema({
-    title: String,
-    image: String,
-    body: String,
-    created: {type: Date, default: Date.now}
-})
-
-// model config
-var Blog = mongoose.model("Blog", blogSchema);
-
-
 
 //Routes
 app.get('/', function(req, res){
@@ -32,7 +23,7 @@ app.get('/', function(req, res){
 
 //INDEX Route
 app.get("/blogs", function(req,res){
-    Blog.find({}, function(err, blogs){
+    db.find({}, function(err, blogs){
         if(err){
             console.log(err)
         } else {
@@ -50,7 +41,7 @@ app.get("/blogs/new", function(req,res){
 app.post("/blogs", function(req,res){
     //creating blog
     req.body.blog.body = req.sanitize(req.body.blog.body)
-    Blog.create(req.body.blog, function(err, newBlog){
+    db.create(req.body.blog, function(err, newBlog){
         if(err){
             res.render('new')
         } else {
@@ -63,7 +54,7 @@ app.post("/blogs", function(req,res){
 
 //show Route
 app.get("/blogs/:id", function(req, res){
-    Blog.findById(req.params.id, function(err, foundBlog){
+    db.findById(req.params.id, function(err, foundBlog){
         if(err){
             res.redirect("/blogs")
         } else {
@@ -74,7 +65,7 @@ app.get("/blogs/:id", function(req, res){
 
 //edit route
 app.get("/blogs/:id/edit", function(req, res){
-    Blog.findById(req.params.id, function(err, foundBlog){
+    db.findById(req.params.id, function(err, foundBlog){
         if(err){
             res.redirect("/blogs");
         } else {
@@ -87,7 +78,7 @@ app.get("/blogs/:id/edit", function(req, res){
 //Update route
 app.put("/blogs/:id", function(req, res){
     req.body.blog.body = req.sanitize(req.body.blog.body)
-    Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog){
+    db.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog){
         if(err){
             res.redirect("/blogs");
         } else {
@@ -99,7 +90,7 @@ app.put("/blogs/:id", function(req, res){
 //Delete route
 app.delete("/blogs/:id", function(req, res){
     //destroy blog
-    Blog.findByIdAndRemove(req.params.id, function(err){
+    db.findByIdAndRemove(req.params.id, function(err){
         if(err){
             res.redirect("/blogs")
         } else {
